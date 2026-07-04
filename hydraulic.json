@@ -1,0 +1,97 @@
+{
+  "v": 3,
+  "settings": {
+    "theme": "light",
+    "projection": "perspective",
+    "grid": true,
+    "axes": false,
+    "labels": true,
+    "axisNumbers": false,
+    "edges": false,
+    "wire": false,
+    "box": 15,
+    "cornerSize": 1,
+    "opacity": 1,
+    "surfaceRes": 48
+  },
+  "params": [
+    {
+      "name": "xlb",
+      "value": 2,
+      "min": 0.5,
+      "max": 6,
+      "step": 0.1
+    },
+    {
+      "name": "xub",
+      "value": 10,
+      "min": -5,
+      "max": 5,
+      "step": 0.1
+    },
+    {
+      "name": "ylb",
+      "value": 0,
+      "min": -5,
+      "max": 5,
+      "step": 0.1
+    },
+    {
+      "name": "yub",
+      "value": 5,
+      "min": -5,
+      "max": 5,
+      "step": 0.1
+    },
+    {
+      "name": "zlb",
+      "value": 0.4,
+      "min": -5,
+      "max": 5,
+      "step": 0.1
+    },
+    {
+      "name": "zub",
+      "value": 2.5,
+      "min": -5,
+      "max": 5,
+      "step": 0.1
+    },
+    {
+      "name": "a",
+      "value": 1.852,
+      "min": -5,
+      "max": 5,
+      "step": 0.1
+    },
+    {
+      "name": "b",
+      "value": 1.3,
+      "min": -5,
+      "max": 5,
+      "step": 0.1
+    }
+  ],
+  "layers": [
+    {
+      "type": "ineq",
+      "name": "hydraulic ineq",
+      "color": 5020415,
+      "visible": true,
+      "input": "x - y >= b * z^a\nb * (min(zub, ((xub - ylb) / b)^(1 / a))^a) >= x - y\nx - y >= 0\nxub >= x\nx >= xlb\nyub >= y\ny >= ylb\nmin(zub, ((xub - ylb) / b)^(1 / a)) >= z\nz >= max(zlb, (max(0, xlb - yub) / b)^(1 / a))\nx >= 0\ny >= 0\nz >= 0",
+      "opacity": null,
+      "pointSize": 1,
+      "showLabels": true
+    },
+    {
+      "type": "ineq",
+      "name": "hydraulic equality",
+      "color": 16745037,
+      "visible": true,
+      "input": "x - y = b * z^a\nb * (min(zub, ((xub - ylb) / b)^(1 / a))^a) >= x - y\nx - y >= 0\nxub >= x\nx >= xlb\nyub >= y\ny >= ylb\nmin(zub, ((xub - ylb) / b)^(1 / a)) >= z\nz >= max(zlb, (max(0, xlb - yub) / b)^(1 / a))\nx >= 0\ny >= 0\nz >= 0",
+      "opacity": null,
+      "pointSize": 1,
+      "showLabels": true
+    }
+  ]
+}
