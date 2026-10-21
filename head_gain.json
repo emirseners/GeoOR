@@ -1,0 +1,144 @@
+{
+  "v": 3,
+  "settings": {
+    "theme": "light",
+    "projection": "perspective",
+    "grid": true,
+    "axes": false,
+    "labels": true,
+    "axisNumbers": false,
+    "edges": false,
+    "wire": false,
+    "box": 25,
+    "cornerSize": 1,
+    "opacity": 1,
+    "surfaceRes": 48
+  },
+  "params": [
+    {
+      "name": "xlb",
+      "value": 0,
+      "min": -5,
+      "max": 10,
+      "step": 0.5
+    },
+    {
+      "name": "xub",
+      "value": 10,
+      "min": 0,
+      "max": 20,
+      "step": 0.5
+    },
+    {
+      "name": "ylb",
+      "value": 7,
+      "min": 0,
+      "max": 15,
+      "step": 0.5
+    },
+    {
+      "name": "yub",
+      "value": 18,
+      "min": 10,
+      "max": 30,
+      "step": 0.5
+    },
+    {
+      "name": "a",
+      "value": 15,
+      "min": 5,
+      "max": 25,
+      "step": 0.5
+    },
+    {
+      "name": "b",
+      "value": 2.5,
+      "min": 0.5,
+      "max": 5,
+      "step": 0.1
+    },
+    {
+      "name": "rho",
+      "value": 2,
+      "min": 1.2,
+      "max": 3,
+      "step": 0.1
+    },
+    {
+      "name": "flb",
+      "value": 0,
+      "min": 0,
+      "max": 2,
+      "step": 0.1
+    },
+    {
+      "name": "fub",
+      "value": 2,
+      "min": 0.5,
+      "max": 4,
+      "step": 0.1
+    }
+  ],
+  "layers": [
+    {
+      "type": "ineq",
+      "name": "S1: pump curve (on state, x=1)",
+      "color": 16745037,
+      "visible": false,
+      "input": "x - y = b * z^rho - a\nxub >= x\nx >= xlb\nyub >= y\ny >= ylb\nz >= max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))\nmin(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) >= z",
+      "opacity": null,
+      "pointSize": 1,
+      "showLabels": true
+    },
+    {
+      "type": "ineq",
+      "name": "conv(S1): hull (12) at x=1",
+      "color": 5020415,
+      "visible": true,
+      "input": "x - y + a >= b * z^rho\nxub >= x\nx >= xlb\nyub >= y\ny >= ylb\nz >= max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))\nmin(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) >= z\nx - y >= b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a\nb * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a >= x - y\nz >= max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho)) + (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (x - y + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho)\nz >= (max(a + xlb - ylb, 0) / b)^(1 / rho) + (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - (max(a + xlb - ylb, 0) / b)^(1 / rho)) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a - xlb + ylb, 0.0001) * (x - xlb) - ((max(a + xlb - ylb, 0) / b)^(1 / rho) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(xlb - ylb + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (y - ylb) - 1000000 * max(b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a - xlb + ylb, 0) - 1000000 * max(xlb - ylb + a - b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho, 0)\nz >= (max(a + xub - yub, 0) / b)^(1 / rho) + ((max(a + xub - yub, 0) / b)^(1 / rho) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(xub - yub + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (x - xub) - (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - (max(a + xub - yub, 0) / b)^(1 / rho)) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a - xub + yub, 0.0001) * (y - yub) - 1000000 * max(b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a - xub + yub, 0) - 1000000 * max(xub - yub + a - b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho, 0)",
+      "opacity": 1,
+      "pointSize": 1,
+      "showLabels": true
+    },
+    {
+      "type": "ineq",
+      "name": "(11) at x=1: no corner cuts",
+      "color": 3065014,
+      "visible": false,
+      "input": "x - y + a >= b * z^rho\nxub >= x\nx >= xlb\nyub >= y\ny >= ylb\nz >= max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))\nmin(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) >= z\nx - y >= b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a\nb * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a >= x - y\nz >= max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho)) + (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (x - y + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho)",
+      "opacity": null,
+      "pointSize": 1,
+      "showLabels": true
+    },
+    {
+      "type": "ineq",
+      "name": "facet (12e): secant",
+      "color": 10395294,
+      "visible": false,
+      "input": "z = max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho)) + (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (x - y + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho)\nx - y + a >= b * z^rho\nxub >= x\nx >= xlb\nyub >= y\ny >= ylb\nx - y >= b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a\nb * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a >= x - y\nz >= (max(a + xlb - ylb, 0) / b)^(1 / rho) + (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - (max(a + xlb - ylb, 0) / b)^(1 / rho)) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a - xlb + ylb, 0.0001) * (x - xlb) - ((max(a + xlb - ylb, 0) / b)^(1 / rho) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(xlb - ylb + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (y - ylb) - 1000000 * max(b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a - xlb + ylb, 0) - 1000000 * max(xlb - ylb + a - b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho, 0)\nz >= (max(a + xub - yub, 0) / b)^(1 / rho) + ((max(a + xub - yub, 0) / b)^(1 / rho) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(xub - yub + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (x - xub) - (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - (max(a + xub - yub, 0) / b)^(1 / rho)) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a - xub + yub, 0.0001) * (y - yub) - 1000000 * max(b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a - xub + yub, 0) - 1000000 * max(xub - yub + a - b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho, 0)",
+      "opacity": null,
+      "pointSize": 1,
+      "showLabels": true
+    },
+    {
+      "type": "ineq",
+      "name": "facet (12f): corner L",
+      "color": 10980346,
+      "visible": false,
+      "input": "z = (max(a + xlb - ylb, 0) / b)^(1 / rho) + (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - (max(a + xlb - ylb, 0) / b)^(1 / rho)) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a - xlb + ylb, 0.0001) * (x - xlb) - ((max(a + xlb - ylb, 0) / b)^(1 / rho) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(xlb - ylb + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (y - ylb) - 1000000 * max(b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a - xlb + ylb, 0) - 1000000 * max(xlb - ylb + a - b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho, 0)\nx - y + a >= b * z^rho\nxub >= x\nx >= xlb\nyub >= y\ny >= ylb\nx - y >= b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a\nb * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a >= x - y\nz >= max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho)) + (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (x - y + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho)\nz >= (max(a + xub - yub, 0) / b)^(1 / rho) + ((max(a + xub - yub, 0) / b)^(1 / rho) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(xub - yub + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (x - xub) - (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - (max(a + xub - yub, 0) / b)^(1 / rho)) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a - xub + yub, 0.0001) * (y - yub) - 1000000 * max(b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a - xub + yub, 0) - 1000000 * max(xub - yub + a - b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho, 0)",
+      "opacity": null,
+      "pointSize": 1,
+      "showLabels": true
+    },
+    {
+      "type": "ineq",
+      "name": "facet (12g): corner U",
+      "color": 15884124,
+      "visible": false,
+      "input": "z = (max(a + xub - yub, 0) / b)^(1 / rho) + ((max(a + xub - yub, 0) / b)^(1 / rho) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(xub - yub + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (x - xub) - (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - (max(a + xub - yub, 0) / b)^(1 / rho)) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a - xub + yub, 0.0001) * (y - yub) - 1000000 * max(b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a - xub + yub, 0) - 1000000 * max(xub - yub + a - b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho, 0)\nx - y + a >= b * z^rho\nxub >= x\nx >= xlb\nyub >= y\ny >= ylb\nx - y >= b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a\nb * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a >= x - y\nz >= max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho)) + (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (x - y + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho)\nz >= (max(a + xlb - ylb, 0) / b)^(1 / rho) + (min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho)) - (max(a + xlb - ylb, 0) / b)^(1 / rho)) / max(b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho - a - xlb + ylb, 0.0001) * (x - xlb) - ((max(a + xlb - ylb, 0) / b)^(1 / rho) - max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))) / max(xlb - ylb + a - b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho, 0.0001) * (y - ylb) - 1000000 * max(b * max(flb, (max(a + xlb - yub, 0) / b)^(1 / rho))^rho - a - xlb + ylb, 0) - 1000000 * max(xlb - ylb + a - b * min(fub, (max(a + xub - ylb, 0) / b)^(1 / rho))^rho, 0)",
+      "opacity": null,
+      "pointSize": 1,
+      "showLabels": true
+    }
+  ]
+}

@@ -7,12 +7,12 @@
 <style>
   :root{
     --bg:#0b0e14; --panel:#141923; --panel2:#1b2230; --ink:#edf2f7; --muted:#9aa6b8;
-    --accent:#5aa2ff; --accent2:#49d6a8; --danger:#ff6b6b; --line:#2b3444; --warn:#ffb454; --opt:#ffb454;
+    --accent:#5aa2ff; --accent2:#49d6a8; --danger:#ff6b6b; --line:#2b3444;
     --stage-fade:#070a10;
   }
   body[data-theme="light"]{
     --bg:#eef3f9; --panel:#f8fafc; --panel2:#ffffff; --ink:#111827; --muted:#334155;
-    --accent:#0b67c2; --accent2:#087f5b; --danger:#c92a2a; --line:#a7b4c6; --warn:#b7791f; --opt:#b7791f;
+    --accent:#0b67c2; --accent2:#087f5b; --danger:#c92a2a; --line:#a7b4c6;
     --stage-fade:#e2e8f0;
   }
   *{box-sizing:border-box}
@@ -47,9 +47,6 @@
   body[data-theme="light"] button.ghost{background:#ffffff;color:#111827}
   button.ghost:hover{border-color:var(--accent);color:var(--accent)}
   button.sm{padding:7px 9px;font-size:12px}
-  .addbtns{display:flex;gap:6px}
-  .addbtns button{font-size:12px;padding:8px 4px}
-  .btn-lin{background:#4c9aff}.btn-hull{background:#39d39f}
   /* layer list */
   .layer-row{display:flex;align-items:center;gap:7px;padding:8px 9px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;background:var(--bg);cursor:default}
   .layer-row.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
@@ -64,9 +61,7 @@
   .typebadge{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted);text-transform:capitalize}
   .hint{font-size:11px;color:var(--muted);line-height:1.55;margin:6px 0}
   .status{font-size:12px;padding:8px 10px;border-radius:8px;margin-top:8px;line-height:1.45}
-  .status.ok{background:rgba(57,211,159,.13);color:var(--accent2);border:1px solid rgba(57,211,159,.3)}
   .status.err{background:rgba(224,49,49,.13);color:var(--danger);border:1px solid rgba(224,49,49,.3)}
-  .status.opt{background:rgba(240,140,0,.14);color:var(--opt);border:1px solid rgba(240,140,0,.35)}
   .divider{height:1px;background:var(--line);margin:12px 0}
   .toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);margin:7px 0;cursor:pointer}
   .toggle input{accent-color:var(--accent);width:auto}
@@ -88,8 +83,7 @@
   .addgrid button,.addgrid .filelbl{font-size:12px;padding:8px 6px;width:100%}
   .addgrid .span2{grid-column:1 / -1}
   #updateAll{margin-top:8px}
-  .btn-lin{background:#4c9aff}.btn-hull{background:#39d39f}.btn-surf{background:#a78bfa}
-  .btn-curve{background:#ff9e64}.btn-pts{background:#ffca3a;color:#1a1a1a}
+  .btn-lin{background:#4c9aff}.btn-hull{background:#39d39f}.btn-pts{background:#ffca3a;color:#1a1a1a}
   .filelbl{display:flex;align-items:center;justify-content:center;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;font-weight:500;cursor:pointer;text-align:center;transition:.15s}
   body[data-theme="light"] .filelbl{background:#ffffff;color:#111827}
   .filelbl:hover{border-color:var(--accent);color:var(--accent)}
@@ -53965,17 +53959,30 @@ class OrbitControls extends EventDispatcher {
 
 		}
 
+		// Multiplier applied to small trackpad wheel deltas so two-finger scroll
+		// zoom keeps pace with a mouse wheel. Raise for faster trackpad zoom.
+		const trackpadZoomBoost = 25;
+
 		function handleMouseWheel( event ) {
 
 			updateZoomParameters( event.clientX, event.clientY );
 
-			if ( event.deltaY < 0 ) {
+			// A mouse wheel emits large deltaY per notch (~100); a trackpad emits
+			// many small pixel-mode deltas. Amplify those so the trackpad isn't slow.
+			let delta = event.deltaY;
+			if ( event.deltaMode === 0 && Math.abs( delta ) < 50 ) {
 
-				dollyIn( getZoomScale( event.deltaY ) );
+				delta *= trackpadZoomBoost;
 
-			} else if ( event.deltaY > 0 ) {
+			}
 
-				dollyOut( getZoomScale( event.deltaY ) );
+			if ( delta < 0 ) {
+
+				dollyIn( getZoomScale( delta ) );
+
+			} else if ( delta > 0 ) {
+
+				dollyOut( getZoomScale( delta ) );
 
 			}
 
@@ -54915,8 +54922,6 @@ function convexHull(points){
   }
   return {points:pts,faces:faces.map(f=>f.v),degenerate:false};
 }
-function polytopeVolume(points,faces){let v=0;for(const f of faces){v+=dot(points[f[0]],cross(points[f[1]],points[f[2]]))/6;}return Math.abs(v);}
-function hullArea(points,faces){let A=0;for(const f of faces){A+=norm(cross(sub(points[f[1]],points[f[0]]),sub(points[f[2]],points[f[0]])))/2;}return A;}
 
 /* ---------- parameters (Desmos-style sliders) ---------- */
 const params={};            // name -> {value,min,max,step}
@@ -55005,8 +55010,10 @@ function compileExpr(expr,allowedVars){
       else left={k:'var',v:t.v};
     }
     else if(t.t==='('){left=pex(0);if(left.error)return left;if(!peek()||peek().t!==')')return {error:'missing )'};next();}
-    else if(t.t==='-'){const e=pex(100);if(e.error)return e;left={k:'neg',e};}
-    else if(t.t==='+'){left=pex(100);if(left.error)return left;}
+    // unary +/- bind looser than ^ (30) but tighter than * (20), so -x^2 == -(x^2)
+    // (Desmos/maths convention), while -x*y stays (-x)*y
+    else if(t.t==='-'){const e=pex(25);if(e.error)return e;left={k:'neg',e};}
+    else if(t.t==='+'){left=pex(25);if(left.error)return left;}
     else return {error:'unexpected token'};
     while(true){const op=peek();if(!op)break;const lbp={'+':10,'-':10,'*':20,'/':20,'^':30}[op.t];if(lbp===undefined||lbp<=rbp)break;next();const right=pex(op.t==='^'?lbp-1:lbp);if(right.error)return right;left={k:'bin',op:op.t,l:left,r:right};}
     return left;
@@ -55290,16 +55297,30 @@ function addSolid(l,points,faces){
   if(op>0)l.group.add(solidMesh(points,faces,l.color,op));
   if(settings.edges)l.group.add(edgeLines(points,faces,mix(l.color,0xffffff,.45)));
 }
-// coincident faces across layers (equality sheet on a solid, hull vs converted
-// polytope, ...) z-fight: give every fill surface a depth-buffer offset so later
-// layers deterministically win, and equality sheets beat solids of their own rank
+// Fill surfaces are drawn with HONEST depth: whatever is genuinely nearer the
+// camera wins. Only where two fills sit in the *same place* do we break the tie
+// with tiny depth-buffer nudges (all far too small to hide genuinely-nearer
+// geometry — a hull's underside seen from below still shows — but big enough to
+// beat exact-coincidence z-fighting):
+//   · every fill gets a per-layer step so two coincident SOLIDS (a hull and its
+//     own facet-inequality polytope) pick one deterministic winner, no stipple;
+//   · an equality SURFACE sheet additionally leads by more than any solid's step,
+//     so the precise boundary sits just on top of a coincident solid regardless
+//     of layer order — like a small 2x2 square resting a hair in front of a 4x4.
+// The FACTOR terms are 0 on purpose: polygonOffsetFactor scales with a surface's
+// depth slope, which blows up at grazing angles and shoves the surface in front of
+// the other along silhouette edges (a spurious rim). The constant UNITS term is
+// uniform across the surface, so it resolves coincidence without that artifact.
+const TIE_F=0, TIE_U=2;        // per-layer tiebreak (later layer wins)
+const SHEET_F=0, SHEET_U=10;   // extra lead that puts a surface on top of solids
 function sheetOffset(mesh){ mesh.userData.sheet=true; return mesh; }
 function applyDepthOffsets(){
   layers.forEach((l,i)=>l.group.traverse(o=>{
     if(!o.userData.fillSurface||!o.material)return;
-    const extraF=o.userData.sheet?2:0, extraU=o.userData.sheet?6:0;
+    let f=-i*TIE_F, u=-i*TIE_U;
+    if(o.userData.sheet){ f-=SHEET_F; u-=SHEET_U; }
     const ms=Array.isArray(o.material)?o.material:[o.material];
-    ms.forEach(m=>{m.polygonOffset=true;m.polygonOffsetFactor=-2*i-extraF;m.polygonOffsetUnits=-4*i-extraU;});
+    ms.forEach(m=>{m.polygonOffset=(f!==0||u!==0);m.polygonOffsetFactor=f;m.polygonOffsetUnits=u;});
   }));
 }
 function refreshFillOpacity(){
@@ -55329,11 +55350,10 @@ function edgeLines(points,faces,color,thr=1){
   const eg=new THREE.EdgesGeometry(faceGeometry(points,faces),thr);
   return new THREE.LineSegments(eg,new THREE.LineBasicMaterial({color}));
 }
-// corner=true -> scaled by the scene "corner size"; corner=false -> primary markers (points/curve ends)
-function vertexSpheres(points,color,baseRadius,corner=true,layerScale=1){
+// baseRadius is scaled by the scene "corner size" and the layer's own point size
+function vertexSpheres(points,color,baseRadius,layerScale=1){
   if(!points.length)return null;
   const inst=new THREE.InstancedMesh(new THREE.SphereGeometry(1,16,12),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.28,roughness:.4,metalness:.05}),points.length);
-  inst.userData.cornerMarker=corner;
   inst.userData.baseRadius=baseRadius;
   inst.userData.layerScale=layerScale;
   inst.userData.markerPositions=points.map(p=>V(p));
@@ -55354,7 +55374,7 @@ function pointLabel(text,p,color){
 
 /* ---------- compute per layer type ---------- */
 function computeLayer(l){
-  clearLayerGroup(l); l.error=''; l.stats=''; l.verts=[]; l.cons=null; l.hullFaces=null; l.markers=[];
+  clearLayerGroup(l); l.error=''; l.verts=[]; l.markers=[];
   try{
     if(l.type==='ineq')         computeInequalities(l);
     else if(l.type==='hull')    computeHull(l);
@@ -55384,16 +55404,13 @@ function computeLinearExact(l,rels){
     if(r.kind==='linear') hs.push({a:r.a,b:r.b});
     else { hs.push({a:r.a,b:r.b+EPS}); hs.push({a:r.a.map(v=>-v),b:-r.b+EPS}); }   // equality -> thin slab
   }
-  l.cons=hs;
   const verts=halfspaceVertices(hs,settings.box);
   if(verts.length<3){l.error='empty / unbounded within ±'+settings.box+' box ('+verts.length+' vertices)';return;}
   const hull=convexHull(verts);
-  l.verts=hull.points; l.hullFaces=hull.faces;
+  l.verts=hull.points;
   l.markers=hull.points.map(p=>({p,kind:'vertex'}));
   addSolid(l,hull.points,hull.faces);
-  const vs=vertexSpheres(hull.points,VERTEX_COLOR,.09,true,l.pointSize||1); if(vs)l.group.add(vs);
-  const vol=polytopeVolume(hull.points,hull.faces);
-  l.stats=hull.points.length+' vertices · '+hull.faces.length+' faces · vol ≈ '+fmt(vol);
+  const vs=vertexSpheres(hull.points,VERTEX_COLOR,.09,l.pointSize||1); if(vs)l.group.add(vs);
 }
 function planeBasis(a,b){
   const nn=norm(a);
@@ -55449,13 +55466,12 @@ function linearSurfacePolygon(rels,R){
 function computeLinearSurfaceExact(l,rels){
   const poly=linearSurfacePolygon(rels,settings.box);
   if(!poly||poly.error){l.error=(poly&&poly.error)||'empty / degenerate plane region';return;}
-  l.verts=poly.points; l.hullFaces=poly.faces;
+  l.verts=poly.points;
   l.markers=poly.points.map(p=>({p,kind:'surface corner'}));
   const op=layerOpacity(l);
   if(op>0)l.group.add(sheetOffset(solidMesh(poly.points,poly.faces,l.color,op,false)));
   if(settings.edges)l.group.add(edgeLines(poly.points,poly.faces,mix(l.color,0xffffff,.45)));
-  const vs=vertexSpheres(poly.points,VERTEX_COLOR,.09,true,l.pointSize||1); if(vs)l.group.add(vs);
-  l.stats=poly.points.length+' corners · '+poly.faces.length+' faces';
+  const vs=vertexSpheres(poly.points,VERTEX_COLOR,.09,l.pointSize||1); if(vs)l.group.add(vs);
 }
 function cellAllowed(cell,positions,regionFns,tol=1e-3){
   if(!regionFns.length)return true;
@@ -55467,22 +55483,6 @@ function cellAllowed(cell,positions,regionFns,tol=1e-3){
   }
   p[0]/=cell.length;p[1]/=cell.length;p[2]/=cell.length;
   return regionFns.every(g=>{const v=g(p[0],p[1],p[2]);return isFinite(v)&&v<=tol;});
-}
-function implicitMeshGeometry(mesh,regionFns=[],tol=1e-3){
-  const pos=[],idx=[];
-  mesh.positions.forEach(p=>{
-    if(!p||!p.every(isFinite)){pos.push(NaN,NaN,NaN);return;}
-    const v=V(p);pos.push(v.x,v.y,v.z);
-  });
-  for(const c of mesh.cells){
-    if(!cellAllowed(c,mesh.positions,regionFns,tol))continue;
-    for(let t=1;t<c.length-1;t++)idx.push(c[0],c[t],c[t+1]);
-  }
-  if(!idx.length)return null;
-  const geo=new THREE.BufferGeometry();
-  geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
-  geo.setIndex(idx);geo.computeVertexNormals();
-  return geo;
 }
 function clipPolysByPlane(polys,a,b){
   const out=[],sd=p=>a[0]*p[0]+a[1]*p[1]+a[2]*p[2]-b;
@@ -55730,10 +55730,8 @@ function computeNonlinearField(l,rels){
   const R=settings.box, N=Math.max(16,settings.surfaceRes|0);
   const clipped=axisBoundsFromLinearRegions(linearRegions,R);
   if(clipped.empty){l.error='empty bounds within +/-'+R+' box';return;}
-  const stats=[];let rendered=false;
+  let rendered=false;
   if(regions.length&&!surfaces.length){
-    // combined feasibility: max of all g (intersection of g_i<=0)
-    const field=(x,y,z)=>{let m=-Infinity;for(const g of regions){const v=g(x,y,z);if(!isFinite(v))return 1e9;if(v>m)m=v;}return m;};
     // sample only the axis-aligned bounds the linear constraints allow (plus a
     // little padding so boundary faces still get a sign change); for a small
     // region in a big box this is what keeps the grid resolution useful
@@ -55773,11 +55771,6 @@ function computeNonlinearField(l,rels){
     });
     if(pieces){
       rendered=true;
-      let inside=0,total=0;
-      const step=[0,1,2].map(i=>(rb[1][i]-rb[0][i])/N);
-      for(let a=0;a<N;a++)for(let b2=0;b2<N;b2++)for(let cc=0;cc<N;cc++){const x=rb[0][0]+(a+.5)*step[0],y=rb[0][1]+(b2+.5)*step[1],z=rb[0][2]+(cc+.5)*step[2];total++;if(field(x,y,z)<=0)inside++;}
-      const vol=inside/total*(rb[1][0]-rb[0][0])*(rb[1][1]-rb[0][1])*(rb[1][2]-rb[0][2]);
-      stats.push(pieces+' boundary piece'+(pieces>1?'s':'')+' · vol ≈ '+fmt(vol)+' (est.)');
       l.verts=allPts;
       // exact corners: intersections of linear plane triples that satisfy the
       // nonlinear constraints, plus points where a nonlinear boundary crosses
@@ -55789,8 +55782,7 @@ function computeNonlinearField(l,rels){
       corners=dedupe(corners,Math.max(1e-4,R*1e-5));
       if(corners.length){
         l.markers=corners.map(p=>({p,kind:'vertex'}));
-        const vs=vertexSpheres(corners,VERTEX_COLOR,.09,true,l.pointSize||1);if(vs)l.group.add(vs);
-        stats.push(corners.length+' corner'+(corners.length>1?'s':''));
+        const vs=vertexSpheres(corners,VERTEX_COLOR,.09,l.pointSize||1);if(vs)l.group.add(vs);
         l.verts=l.verts.concat(corners);
       }
     }
@@ -55808,25 +55800,20 @@ function computeNonlinearField(l,rels){
   const clipPlanes=linearRegions.map(r=>({a:r.a,b:r.b}));
   clipPlanes.push({a:[1,0,0],b:R},{a:[-1,0,0],b:R},{a:[0,1,0],b:R},{a:[0,-1,0],b:R},{a:[0,0,1],b:R},{a:[0,0,-1],b:R});
   const cellMax=Math.max(growBounds[1][0]-growBounds[0][0],growBounds[1][1]-growBounds[0][1],growBounds[1][2]-growBounds[0][2])/N;
-  let cornerCount=0;
   surfaces.forEach(g=>{
     const mesh=surfaceNets([N,N,N],safeField(g),growBounds);
     const res=mesh.positions.length?clippedSurfaceGeometry(mesh,nonlinearRegions,cellMax*1.5,clipPlanes):null;
     if(res){
       const m=sheetOffset(new THREE.Mesh(res.geo,surfaceMaterial(l.color,layerOpacity(l),false)));m.userData.fillSurface=true;l.group.add(m);rendered=true;
-      stats.push(res.pts.length+' equation pts');
       if(!l.verts.length)l.verts=res.pts.filter((_,k)=>k%8===0);
     }
     const corners=surfaceCorners(g,linearRegions,regions,sampleBounds,R,N);
     if(corners.length){
-      cornerCount+=corners.length;
       l.verts=l.verts.concat(corners);
       l.markers=l.markers.concat(corners.map(p=>({p,kind:'surface corner'})));
     }
   });
   if(!rendered){l.error=(surfaces.length?'surface not found within ±'+R+' box':'region empty or fills the whole ±'+R+' box');return;}
-  if(cornerCount)stats.push(cornerCount+' corner'+(cornerCount>1?'s':''));
-  l.stats=stats.join(' · ');
 }
 function parsePointLines(input){
   const pts=[],labels=[],errs=[];
@@ -55847,11 +55834,10 @@ function computePoints(l){
   const {pts,labels,errs}=parsePointLines(l.input);
   if(errs.length){l.error=errs.join('; ');return;}
   if(!pts.length){l.error='no points';return;}
-  const vs=vertexSpheres(pts,l.color,.14,false,l.pointSize||1); if(vs)l.group.add(vs);
+  const vs=vertexSpheres(pts,l.color,.14,l.pointSize||1); if(vs)l.group.add(vs);
   if(l.showLabels)pts.forEach((p,i)=>{if(labels[i])l.group.add(pointLabel(labels[i],p,mix(l.color,0xffffff,.25)));});
   l.verts=pts;
   l.markers=pts.map((p,i)=>({p,kind:'point',label:labels[i]}));
-  l.stats=pts.length+' point'+(pts.length>1?'s':'');
 }
 function computeHull(l){
   const {pts,errs}=parsePointLines(l.input);
@@ -55862,12 +55848,11 @@ function computeHull(l){
   const used=new Set(hull.faces.flat());
   const hv=[...used].map(i=>hull.points[i]);
   addSolid(l,hull.points,hull.faces);
-  const vs=vertexSpheres(hv,l.color,.11,true,l.pointSize||1); if(vs)l.group.add(vs);
+  const vs=vertexSpheres(hv,l.color,.11,l.pointSize||1); if(vs)l.group.add(vs);
   const interior=pts.filter(p=>!hv.some(q=>Math.abs(q[0]-p[0])<1e-9&&Math.abs(q[1]-p[1])<1e-9&&Math.abs(q[2]-p[2])<1e-9));
-  const is=vertexSpheres(interior,INTERIOR_COLOR,.07,true,l.pointSize||1); if(is)l.group.add(is);
-  l.verts=hull.points; l.hullFaces=hull.faces;
+  const is=vertexSpheres(interior,INTERIOR_COLOR,.07,l.pointSize||1); if(is)l.group.add(is);
+  l.verts=hull.points;
   l.markers=hv.map(p=>({p,kind:'hull vertex'})).concat(interior.map(p=>({p,kind:'interior point'})));
-  l.stats=pts.length+' pts → '+used.size+' hull verts · '+hull.faces.length+' faces · vol ≈ '+fmt(polytopeVolume(hull.points,hull.faces));
 }
 /* ---------- points -> inequalities conversion ---------- */
 function cnum(v){const r=parseFloat(v.toFixed(6));return Object.is(r,-0)?0:r;}
@@ -56026,7 +56011,6 @@ function renderInspector(){
   if(l.type==='ineq') html+='<button class="ghost sm" id="insCornerHull" style="margin-top:8px">Convex Hull layer from corners</button>';
   if(usesPoints) html+='<button class="ghost sm" id="insToIneq" style="margin-top:8px">Inequalities layer from points</button>';
   if(l.error) html+='<div class="status err">'+esc(l.error)+'</div>';
-  else if(l.stats) html+='<div class="status ok">'+esc(l.stats)+'</div>';
   box.innerHTML=html;
   el('insName').oninput=()=>{l.name=el('insName').value;renderLayerList();scheduleSave();};
   el('insColor').oninput=()=>{l.color=parseInt(el('insColor').value.slice(1),16);computeLayer(l);renderLayerList();};
@@ -56211,7 +56195,19 @@ function resize(){
 }
 let needsRender=true;
 function render(){needsRender=true;}
-function loop(){requestAnimationFrame(loop);controls.update();if(needsRender||controls.enableDamping){renderer.render(scene,camera);}}
+// Keep the depth range tight around the scene so the depth buffer stays precise at
+// every zoom level. A fixed near/far (0.01 .. 4000) gives a ~400000:1 ratio, which
+// starves far/zoomed-out geometry of depth precision and reintroduces z-fighting
+// between near-coincident surfaces; bracketing near/far to the camera distance keeps
+// the ratio small and the tiny coincidence offsets effective.
+function updateClipPlanes(){
+  const dist=camera.position.distanceTo(controls.target);
+  const radius=settings.box*3+2;                 // encloses the grid, axes & arrowheads
+  let near=dist-radius, far=dist+radius;
+  if(camera.isPerspectiveCamera)near=Math.max(near,dist*0.002,0.02);
+  if(camera.near!==near||camera.far!==far){camera.near=near;camera.far=far;camera.updateProjectionMatrix();}
+}
+function loop(){requestAnimationFrame(loop);controls.update();if(needsRender||controls.enableDamping){updateClipPlanes();renderer.render(scene,camera);}}
 new ResizeObserver(resize).observe(stage);
 
 /* ==================================================================
